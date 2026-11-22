@@ -111,7 +111,7 @@ public class TimetableTest {
     }
 
     @Test
-    void testSessionsSortedByMinutesWithinSameHour () {
+    void testSessionsSortedByMinutesWithinSameHour() {
         Timetable timetable = new Timetable();
 
         Coach coach = new Coach("Васильев", "Николай", "Сергеевич");
@@ -132,5 +132,65 @@ public class TimetableTest {
 
         assertEquals(0, monday.firstKey().getMinutes());
         assertEquals(50, monday.lastKey().getMinutes());
+    }
+
+    @Test
+    void testGetCountByCoachesSortedDescending() {
+        Timetable timetable = new Timetable();
+
+        Coach coach1 = new Coach("Васильев", "Николай", "Сергеевич");
+        Coach coach2 = new Coach("Семёнов", "Валерий", "Сергеевич");
+        Group group = new Group("Акробатика для детей", Age.CHILD, 15);
+        TrainingSession firstTrainingSession = new TrainingSession(group, coach1,
+                DayOfWeek.MONDAY, new TimeOfDay(12, 30));
+        TrainingSession secondTrainingSession = new TrainingSession(group, coach2,
+                DayOfWeek.MONDAY, new TimeOfDay(13, 30));
+        TrainingSession thirdTrainingSession = new TrainingSession(group, coach2,
+                DayOfWeek.MONDAY, new TimeOfDay(14, 30));
+        TrainingSession fourthTrainingSession = new TrainingSession(group, coach2,
+                DayOfWeek.MONDAY, new TimeOfDay(15, 30));
+
+        timetable.addNewTrainingSession(firstTrainingSession);
+        timetable.addNewTrainingSession(secondTrainingSession);
+        timetable.addNewTrainingSession(thirdTrainingSession);
+        timetable.addNewTrainingSession(fourthTrainingSession);
+
+        List<CounterOfTrainings> result = timetable.getCountByCoaches();
+
+        assertEquals(2, result.size());
+        assertEquals("Семёнов", result.get(0).getCoach().getSurname());
+        assertEquals(3, result.get(0).getCount());
+        assertEquals("Васильев", result.get(1).getCoach().getSurname());
+        assertEquals(1, result.get(1).getCount());
+    }
+
+    @Test
+    void testGetCountByCoachesEmptyTimetable() {
+        Timetable timetable = new Timetable();
+
+        List<CounterOfTrainings> result = timetable.getCountByCoaches();
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testGetCountByCoachesSameCoachDifferentObjects() {
+        Timetable timetable = new Timetable();
+
+        Coach coach1 = new Coach("Васильев", "Николай", "Сергеевич");
+        Coach coach2 = new Coach("Васильев", "Николай", "Сергеевич");
+        Group group = new Group("Акробатика для детей", Age.CHILD, 15);
+        TrainingSession firstTrainingSession = new TrainingSession(group, coach1,
+                DayOfWeek.MONDAY, new TimeOfDay(12, 30));
+        TrainingSession secondTrainingSession = new TrainingSession(group, coach2,
+                DayOfWeek.MONDAY, new TimeOfDay(13, 30));
+
+        timetable.addNewTrainingSession(firstTrainingSession);
+        timetable.addNewTrainingSession(secondTrainingSession);
+
+        List<CounterOfTrainings> result = timetable.getCountByCoaches();
+
+        assertEquals(1, result.size());
+        assertEquals(2, result.get(0).getCount());
     }
 }
